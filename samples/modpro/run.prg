@@ -1,4 +1,4 @@
-// Used from samples/sandbox.prg
+// Used from samples/modpro/modpro.prg
 
 function Main()
 
@@ -6,15 +6,15 @@ function Main()
    local cCode
    
    if hb_HHasKey( hPostPairs, "source" )
-      cCode = hb_UrlDecode( hPostPairs[ "source" ] )
+      cCode = hPostPairs[ "source" ]
    else
-      ? "This example is used from samples/sandbox.prg"
+      ? "This example is used from samples/modpro/modpro.prg"
    endif   
    
    AP_HeadersOutSet( "Access-Control-Allow-Origin", "*" )
    
    if ! Empty( cCode )
-      Execute( cCode )
+      Execute( cCode, hb_UrlDecode( hPostPairs[ "params" ] ) )
    endif
    
 return nil

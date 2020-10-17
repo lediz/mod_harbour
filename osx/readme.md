@@ -1,16 +1,86 @@
-**IMPORTANT** In order to build mod_harbour.so for OSX do this:
+Apple provides an installed apache by default, that serves pages at:
 
-**1.** brew install apache2
+```
+/Library/WebServer/Documents
 
-**2.** mkdir temp, cd temp, apxs -g -n harbour
+if you have used brew to install httpd then the pages are located at:
 
-**3.** modify Makefile this line:
+/usr/local/var/www
+```
 
-top_builddir=/usr/local/opt/httpd/lib/httpd
+Download mod_harbour files:
+```
+git clone https://github.com/fivetechsoft/mod_harbour
+```
 
-**4.** copy mod_harbour.c to the created harbour folder and do "make"
+Create the required symbolic links:
+```
+cd /usr/local/httpd/modules
+sudo ln -sf /Users/$USER/mod_harbour/osx/mod_harbour.so mod_harbour.so
+cd /Library/WebServer/Documents
+sudo ln -sf /Users/$USER/mod_harbour/osx/libharbour.3.2.0.dylib libharbour.3.2.0.dylib
+sudo ln -sf /Users/$USER/mod_harbour/samples modharbour_samples
+```
 
-*******************************************************************************
+Edit **httpd.conf** at /private/etc/apache2 (or at /usr/local/etc/httpd/httpd.conf) and add these lines:
+```
+LoadModule harbour_module /usr/local/httpd/modules/mod_harbour.so
+
+<FilesMatch "\.(prg|hrb)$">
+    SetHandler harbour
+</FilesMatch>
+```
+and add Indexes here:
+```
+Options Indexes FollowSymLinks Multiviews
+```
+
+Restart apache:
+```
+sudo apachectl start
+```
+
+Now just browse to **localhost/modharbour_samples/** from from browser and click on any PRG file
+
+In case that you get errors please review the log files at:
+```
+/var/log/apache2
+```
+
+<hr>
+
+In case that **you want to rebuild mod_harbour yourself**, then you need to install brew as the default installed apache does not provides all the required files (headers and libraries) to build it:
+
+```
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+brew install httpd
+```
+<hr>
+
+0. Install curl and pcre:
+
+```
+brew install curl
+brew install pcre
+```
+
+1. Download Harbour and build it:
+
+```
+git clone https://github.com/harbour/core harbour
+export HB_WITH_CURL=/usr/local/Cellar/curl/7.70.0/include/
+export HB_WITH_OPENSSL=/usr/local/Cellar/openssl@1.1/1.1.1g
+export HB_BUILD_CONTRIBS=""
+make
+```
+
+2. Install Apache so we get the missing required headers and libraries:
+
+```
+brew install httpd
+```
+
 
 **1.** sudo apachectl start
 
@@ -129,24 +199,6 @@ ln -sf /Users/anto/mod_harbour/samples modharbour_samples
 sudo apachectl restart
 
 <hr>
-
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-
-brew install httpd
-
-mkdir $HOME/temp
-
-cd $HOME/temp
-
-apxs -g -n harbour
-
-cd $HOME
-
-git clone https://github.com/FiveTechSoft/mod_harbour
-
-cp $HOME/mod_harbour/mod_harbour.c $HOME/temp/harbour
-
-***
 
 [![](https://bitbucket.org/fivetech/screenshots/downloads/harbour.jpg)](https://harbour.github.io "The Harbour Project")
 <a href="https://httpd.apache.org/" alt="The Apache HTTP Server Project"><img width="150" height="150" src="http://www.apache.org/img/support-apache.jpg"></a>

@@ -1,13 +1,16 @@
 [![](https://bitbucket.org/fivetech/screenshots/downloads/fivetech_logo.gif)](http://www.fivetechsoft.com "FiveTech Software")
 
-These instructions are to build the mod and the libharbour.so.3.2.0 files. If you simply want to test them
-without having to build them, select your Linux distribution, download the two files and follow these steps:
+**How to install mod_harbour:**
 
-Copy libharbour.so.3.2.0 to /var/www/html
-
-Copy mod_harbour.so to /usr/lib/apache2/modules
-
-In /etc/apache2/apache2.conf add these lines:
+```
+git clone https://github.com/fivetechsoft/mod_harbour
+cd /var/www/html
+sudo ln -sf ~/mod_harbour/linux/libharbour.so.3.2.0 libharbour.so.3.2.0
+sudo ln -sf ~/mod_harbour/samples modharbour_samples
+cd /usr/lib/apache2/modules
+sudo ln -sf ~/mod_harbour/linux/mod_harbour.so mod_harbour.so
+```
+In /etc/apache2/apache2.conf add these lines at the bottom of the file:
 ```
 LoadModule harbour_module /usr/lib/apache2/modules/mod_harbour.so
 <FilesMatch "\.(prg|hrb)$">
@@ -16,67 +19,84 @@ LoadModule harbour_module /usr/lib/apache2/modules/mod_harbour.so
 ```
 Restart apache doing this: 
 
+```
 sudo apachectl restart
-
-Copy samples/test.prg to /var/www/html and go to localhost/test.prg in your browser
-
-**Instructions to build them (skip this if you just want to test it without build them)**
-
-The mod_harbour for Apache on Linux uses a different approach that turns it much much faster and lighter.
-
-This is the required structure of folders to create mod_harbour:
-```
- + /home/username
-   + mod_harbour
-   + harbour_for_modharbour
-   + temp
-      + harbour  (created using apxs -g -n harbour from temp folder)
 ```
 
-**0. Changes to build Harbour:**
+Go to localhost/modharbour_samples/ from your browser and click on any .prg
 
-In both **config/dyn.mk** and **config/lib.mk** HB_DYN_LIBS add hbcplr \
+<hr>
 
-In **src/Makefile** DYNDIRLIST_BASE add src/compiler \
+**How to build mod_harbour:**
 
-In **src/harbour.def** add HB_FUN_HB_COMPILEFROMBUF
+You need to install these Linux packages:
+```
+sudo apt install libcurl4-openssl-dev
+sudo apt install libssl-dev
+sudo cp -r /usr/include/x86_64-linux-gnu/curl /usr/include
+```
 
-Copy **apache.prg** to src/rtl and modify Makefile to add it in PRG_SOURCES section
+First of all, build Harbour
+```
+git clone https://github.com/harbour/core harbour
+cd harbour
+export HB_USER_CFLAGS="-fPIC"
+export HB_BUILD_CONTRIBS
+make
+```
+Install apache and apache2-dev
+```
+sudo apt install apache2
+sudo apt install apache2-dev
+```
+then give execution permissions to go.sh and execute it:
+```
+chmod +x go.sh
+./go.sh
+```
+Once built, do this:
+```
+cd /var/www/html
+sudo ln -sf ~/mod_harbour/linux/libharbour.so.3.2.0 libharbour.so.3.2.0
+sudo ln -sf ~/mod_harbour/samples modharbour_samples
+cd /usr/lib/apache2/modules
+sudo ln -sf ~/mod_harbour/linux/mod_harbour.so mod_harbour.so
+```
+and restart apache
+```
+sudo systemctl restart apache2
 
-If you want to have sources line numbers do this before calling make:
+or
 
-export HB_USER_PRGFLAGS=-l-
+sudo service apache2 restart
+```
 
-Correct libharbour.so.3.2.0 size should be around 6.262.832
+Then from your browser go to:
+```
+localhost/modharbour_samples
+```
+In case you get a wrong behavior, please check:
+```
+/var/log/apache2/error.log
+```
 
-**1. It has been built using the Windows 10 bash:**
+***
 
-https://www.howtogeek.com/249966/how-to-install-and-use-the-linux-bash-shell-on-windows-10/
-
-**2. Install this from the Windows 10 bash:**
-
-sudo apt-get install apache2-dev
-
-**3. go to /home/<username> and type this:**
-
-apxs -n harbour -g
-
-This will create a harbour folder with all the required files inside it
-
-**4. In order to test this do:**
-
-make all
-
-sudo make install
-
-sudo make test
-
-**5. Copy ~/harbour/lib/linux/gcc/libharbour.so.3.2.0 to /var/www/html**
-
-cp ~/harbour/lib/linux/gcc/libharbour.so.3.2.0 /var/www/html
-
-**6. Now replace your mod_harbour.c with the one provided here and repeat the step 4**
-
+To use the rewrite module you have to modify /etc/apache2/apache2.conf directly and not use .htaccess (because rewrite gets not enough memory). This way it works fine and there are no segmentation faults in error.log
+```
+<Directory /var/www/html/snipets>
+  SetEnv APP_TITLE "Snipets v0.1"
+  SetEnv PATH_URL "/snipets" 
+  SetEnv PATH_APP "/snipets" 
+  SetEnv PATH_DATA "/snipets/data/" 
+  DirectoryIndex index.prg main.prg
+  RewriteEngine on
+  RewriteCond %{REQUEST_FILENAME} !-f 
+  RewriteCond %{REQUEST_FILENAME} !-d 
+  RewriteRule ^(.*)$ index.prg/$1 [L]
+</Directory>
+```
+https://httpd.apache.org/docs/2.4/en/howto/htaccess.html
 ***
 
 [![](https://bitbucket.org/fivetech/screenshots/downloads/harbour.jpg)](https://harbour.github.io "The Harbour Project")

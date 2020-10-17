@@ -48,6 +48,48 @@
       .modal-dialog{
          display:none;
       }
+
+      #body{
+         background-color:aquamarine;
+         height: calc( 100% - 25px );
+         width: 100%;
+      }
+      
+      #editor {
+        margin-left: 0px;
+        width:946px;
+        float: left;
+        bottom: 0px;
+        position: absolute;
+        top: 30px;
+      }
+
+      #splitter{
+         width:5px;
+         background-color: white;
+         cursor:col-resize;
+         float:left;
+         height: 100%;
+      }
+      
+      #right{
+          font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
+          margin-left: 947px;
+          position: absolute;
+          top: 30px;
+          bottom: 0px;
+      }
+      
+      #output{
+        height: 100%;
+        padding: 10px;
+        width: 100%;
+        min-width: 50px;
+      }   
+
+      .fa-1x {
+         font-size: 0.85em;
+      }
    </style>
 
    <script>
@@ -114,12 +156,19 @@
            var reader = new FileReader();
            oFile = evt.target.files[0];
            reader.onload = function( e ) {
-              editor.session.setValue( e.target.result ) };
+              editor.session.setValue( e.target.result ); 
+              sessionStorage.setItem( 'code', e.target.result ); };
            reader.readAsText( oFile ); 
            }
 
         oFPicker.click(); 
       } 
+
+      function ClosePrg()
+      {
+         editor.session.setValue( '' );   
+         sessionStorage.setItem( 'code', '' );
+      }
 
       function OpenDbf()
       { 
@@ -207,13 +256,19 @@
       function Copy()
       {
          editor.focus();
-         document.execCommand('copy');;
+         document.execCommand('copy');
       }
 
       function Paste()
       {
          editor.focus();
-         document.execCommand('paste');;
+         document.execCommand('paste');
+      }
+
+      function Clear()
+      {
+         $('#output').html('');
+         sessionStorage.setItem( 'result', '' );
       }
 
       function SelectAll()
@@ -225,5 +280,15 @@
       {
          editor.gotoLine( parseInt( cLine ), 0, true );
       }
+      
+      function GetParams()
+      {
+         MsgGet( 'params:  ', 'params to provide', 'SaveParams(', sessionStorage.getItem( 'params' ) );
+      }
+      
+      function SaveParams( cParams )
+      {
+         sessionStorage.setItem( 'params', cParams );
+      }   
    </script>  
 </head>

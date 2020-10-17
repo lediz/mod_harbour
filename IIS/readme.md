@@ -28,19 +28,28 @@ Select mod_harbour.dll
 
 Go to c:\inetpub\wwwroot\ 
 
-Create a hello.prg
+Create this symlink: (run cmd as administrator)
 
+mklink /j modharbour_samples c:\mod_harbour\samples
+
+enable Directories features from IIS panel
+
+go to localhost/modharbour_samples
+
+or
+
+Create a hello.prg
 Create a test.html
 
 **4. From the web browser go to localhost/hello.prg**
 
 Also go to localhost/test.html
 
-**5. libharbour.dll has to be copied here:**
+***
 
-c:\Windows\SysWOW64\inetsrv\
+In case that you experience any errors, please review the IIS log files at:
 
-and give it proper permissions: read and execute 
+%SystemDrive%\inetpub\logs\LogFiles by default.
 
 ***
 
